@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "loggingx"
+version = "1.0.0"
+authors = [
+  { name="xingweidong", email="614968414@qq.com" },
+]
+maintainers = [
+  { name="xingweidong", email="614968414@qq.com" },
+]
+description = "logging拓展功能模块"
+readme = "README.md"
+requires-python = ">=3.7"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = []
+[project.optional-dependencies]
+queue = ["redis>=4.5.5",]
+
+[project.urls]
+"Homepage" = "https://github.com/Xingwd/loggingx"
+"Issue Tracker" = "https://github.com/Xingwd/loggingx/issues"
+"Code" = "https://github.com/Xingwd/loggingx"
+"Releases" = "https://github.com/Xingwd/loggingx/releases"
