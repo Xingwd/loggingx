@@ -3,7 +3,7 @@
 logging拓展功能模块。
 
 [Installation](#installation) |  [Usage](#usage)
----------------------------------------------
+***
 
 ## Installation
 
@@ -28,10 +28,54 @@ loggingx在使用上基本和logging一致。
 将日志消息发布到redis stream消息队列，配合[handlers.RedisStreamListener](#handlersredisstreamlistener)可以解决多进程写日志文件不安全的问题。
 
 ``` python
+# 示例一：直接使用
+
 logger = logging.getLogger('test')
 logger.setLevel(logging.DEBUG)
-rlh = RedisStreamHandler(redis_url)
-logger.addHandler(rlh)
+rsh = RedisStreamHandler('redis://redis:6379/0')
+logger.addHandler(rsh)
+
+# 示例二：在配置文件中使用
+LOGGING_CONFIG = {
+   'version': 1,
+   'disable_existing_loggers': False,
+   'formatters': {
+      'verbose': {
+         'format': '%(asctime)s.%(msecs)03d %(levelname)-8s %(processName)s:%(threadName)s %(pathname)s:%(lineno)d - %(message)s',
+         'datefmt': '%Y-%m-%d %H:%M:%S'
+      },
+      'simple': {
+         'format': '{name:s}: {asctime:s} {levelname} {message}',
+         'style': '{',
+         'datefmt': '%Y-%m-%d %H:%M:%S'
+      },
+   },
+   'handlers': {
+      'console': {
+         'class': 'logging.StreamHandler',
+         'level': 'INFO',
+         'formatter': 'simple'
+      },
+      'redis_stream': {
+         'class': 'loggingx.handlers.RedisStreamHandler',
+         'level': 'INFO',
+         'redis_url': 'redis://redis:6379/0'
+      }
+   },
+   'loggers': {
+      'cloud': {
+         'handlers': ['console'],
+         'propagate': True,
+      },
+      'cloud.request': {
+         'handlers': ['redis_stream'],
+         'level': 'INFO',
+         'propagate': True,
+      }
+    },
+}
+
+logging.config.dictConfig(LOGGING_CONFIG)
 ```
 
 在多进程服务中使用RedisStreamHandler，然后单独启动一个进程运行RedisStreamListener，可以保证日志消息完整传递到下游处理器。
@@ -51,6 +95,6 @@ fh.setLevel(logging.DEBUG)
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 fh.setFormatter(formatter)
 # 使用RedisStreamListener消费RedisStreamHandler消息，传递到TimedRotatingFileHandler
-rsl = RedisStreamListener(redis_url, fh)
+rsl = RedisStreamListener('redis://redis:6379/0', fh)
 rsl.start()
 ```

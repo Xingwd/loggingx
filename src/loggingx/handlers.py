@@ -1,6 +1,5 @@
 import redis
-from typing import Union
-from logging import LogRecord, makeLogRecord
+from logging import makeLogRecord
 from logging.handlers import QueueHandler, QueueListener
 
 
@@ -14,8 +13,8 @@ class RedisStreamHandler(QueueHandler):
 
     def __init__(
         self,
-        redis_url: str,
-        redis_stream_key: str = DEFAULT_REDIS_STREAM_KEY,
+        redis_url,
+        redis_stream_key = DEFAULT_REDIS_STREAM_KEY,
         **redis_kwargs
     ):
         """
@@ -33,7 +32,7 @@ class RedisStreamHandler(QueueHandler):
 
         super().__init__(r)
 
-    def enqueue(self, record: LogRecord):
+    def enqueue(self, record):
         """
         Override QueueHandler.enqueue(self, record)方法。
         发布日志消息到redis stream消息队列。
@@ -53,10 +52,10 @@ class RedisStreamListener(QueueListener):
 
     def __init__(
         self,
-        redis_url: str,
+        redis_url,
         *handlers,
-        respect_handler_level: bool = False,
-        redis_stream_key: str = DEFAULT_REDIS_STREAM_KEY,
+        respect_handler_level = False,
+        redis_stream_key = DEFAULT_REDIS_STREAM_KEY,
         **redis_kwargs
     ):
         """
@@ -85,7 +84,7 @@ class RedisStreamListener(QueueListener):
 
         super().__init__(r, *handlers, respect_handler_level=respect_handler_level)
 
-    def dequeue(self, block) -> Union[dict[bytes, bytes], None]:
+    def dequeue(self, block):
         """
         Override QueueHandler.dequeue(self, block)方法。
         消费redis stream消息队列的日志消息。
@@ -116,7 +115,7 @@ class RedisStreamListener(QueueListener):
                 self.queue.xdel(self.redis_stream_key, id)
         return record
 
-    def redis_encode(self, value: str) -> bytes:
+    def redis_encode(self, value):
         """
         使用redis连接实例的编码参数进行编码。
 
@@ -129,7 +128,7 @@ class RedisStreamListener(QueueListener):
 
         return value.encode(self.redis_encoding, self.redis_encoding_errors)
 
-    def redis_decode(self, value: bytes) -> str:
+    def redis_decode(self, value):
         """
         使用redis连接实例的编码参数进行解码。
 
@@ -142,7 +141,7 @@ class RedisStreamListener(QueueListener):
 
         return value.decode(self.redis_encoding, self.redis_encoding_errors)
 
-    def prepare(self, record: dict[bytes, bytes]) -> LogRecord:
+    def prepare(self, record):
         """
         Override QueueHandler.prepare(self, record)方法。
         准备日志消息，将从redis stream消息队列消费的消息转换成LogRecord实例。
